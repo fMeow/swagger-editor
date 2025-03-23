@@ -29,9 +29,13 @@ const MonacoEditor = ({
   const editorRef = useRef(null);
   const subscriptionRef = useRef(null);
   const valueRef = useRef(value);
+  const preventCreation = useRef(false);
   const [isEditorReady, setIsEditorReady] = useState(false);
 
   const createEditor = useCallback(() => {
+    if (!containerRef.current) return;
+    if (preventCreation.current) return;
+
     editorRef.current = monaco.editor.create(containerRef.current, {
       value,
       language,
@@ -66,20 +70,21 @@ const MonacoEditor = ({
 
     editorRef.current.getModel().updateOptions({ tabSize: 2 });
     setIsEditorReady(true);
+    preventCreation.current = true;
   }, [value, language, theme, isReadOnly]);
 
   const disposeEditor = useCallback(() => {
-    onWillUnmount(editorRef.current);
+    onWillUnmount(editorRef.current, monaco);
     subscriptionRef.current?.dispose();
     editorRef.current.getModel()?.dispose();
     editorRef.current.dispose();
   }, [onWillUnmount]);
 
   // disposing of Monaco Editor
-  useMount(() => () => {
-    if (editorRef.current) {
-      disposeEditor();
-    }
+  useMount(() => {
+    return () => {
+      if (editorRef.current) disposeEditor();
+    };
   });
 
   // defining the custom themes and setting the active one
@@ -129,9 +134,13 @@ const MonacoEditor = ({
   );
 
   // settings the theme if changed
-  useEffect(() => {
-    monaco.editor.setTheme(theme);
-  }, [theme]);
+  useUpdate(
+    () => {
+      monaco.editor.setTheme(theme);
+    },
+    [theme],
+    isEditorReady
+  );
 
   // register listener for validation markers
   useEffect(() => {
@@ -183,7 +192,7 @@ const MonacoEditor = ({
 
   // creating Editor instance as last effect
   useEffect(() => {
-    if (!isEditorReady && containerRef.current) {
+    if (!isEditorReady) {
       createEditor();
     }
   }, [isEditorReady, createEditor]);

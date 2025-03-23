@@ -4,6 +4,7 @@ SwaggerEditor is using [**forked** Create React App](https://github.com/swagger-
 
 ## Table of Contents
 
+- [Anonymized analytics](#anonymized-analytics)
 - [Getting started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -18,6 +19,23 @@ SwaggerEditor is using [**forked** Create React App](https://github.com/swagger-
 - [Docker](#docker)
 - [License](#license)
 - [Software Bill Of Materials (SBOM)](#software-bill-of-materials-sbom)
+
+## Anonymized analytics
+
+Swagger Editor uses [Scarf](https://scarf.sh/) to collect [anonymized installation analytics](https://github.com/scarf-sh/scarf-js?tab=readme-ov-file#as-a-user-of-a-package-using-scarf-js-what-information-does-scarf-js-send-about-me). These analytics help support the maintainers of this library and ONLY run during installation. To [opt out](https://github.com/scarf-sh/scarf-js?tab=readme-ov-file#as-a-user-of-a-package-using-scarf-js-how-can-i-opt-out-of-analytics), you can set the `scarfSettings.enabled` field to `false` in your project's `package.json`:
+
+```
+// package.json
+{
+  // ...
+  "scarfSettings": {
+    "enabled": false
+  }
+  // ...
+}
+```
+
+Alternatively, you can set the environment variable `SCARF_ANALYTICS` to `false` as part of the environment that installs your npm packages, e.g., `SCARF_ANALYTICS=false npm install`.
 
 ## Getting started
 
@@ -36,7 +54,7 @@ Assuming [prerequisites](#prerequisites) are already installed, SwaggerEditor np
 You can install SwaggerEditor via [npm CLI](https://docs.npmjs.com/cli) by running the following command:
 
 ```sh
- $ npm install swagger-editor@>=5
+ $ npm install swagger-editor@alpha
 ````
 
 > NOTE: when using bundler to build your project which is using swagger-editor@5 npm package,
@@ -84,7 +102,6 @@ Install dependencies needed for webpack@5 to properly build SwaggerEditor.
 
 ```sh
  $ npm i stream-browserify --save-dev
- $ npm i process --save-dev
  $ npm i https-browserify --save-dev
  $ npm i stream-http --save-dev
  $ npm i util --save-dev
@@ -120,11 +137,12 @@ module.exports = {
     alias: {
       // This alias make sure we don't pull two different versions of monaco-editor
       'monaco-editor': '/node_modules/monaco-editor',
+      // This alias makes sure we're avoiding a runtime error related to this package
+      '@stoplight/ordered-object-literal$': '/node_modules/@stoplight/ordered-object-literal/src/index.mjs',
     },
   },
   plugins: [
     new webpack.ProvidePlugin({
-      process: 'process/browser.js',
       Buffer: ['buffer', 'Buffer'],
     }),
   ],
@@ -172,7 +190,6 @@ Install `copy-webpack-plugin` and other needed dependencies.
 ```sh
  $ npm i copy-webpack-plugin --save-dev
  $ npm i stream-browserify --save-dev
- $ npm i process --save-dev
  $ npm i https-browserify --save-dev
  $ npm i stream-http --save-dev
  $ npm i util --save-dev
@@ -207,11 +224,12 @@ module.exports = {
     alias: {
       // This alias make sure we don't pull two different versions of monaco-editor
       'monaco-editor': '/node_modules/monaco-editor',
+      // This alias makes sure we're avoiding a runtime error related to this package
+      '@stoplight/ordered-object-literal$': '/node_modules/@stoplight/ordered-object-literal/src/index.mjs',
     }
   },
   plugins: [
     new webpack.ProvidePlugin({
-      process: 'process/browser.js',
       Buffer: ['buffer', 'Buffer'],
     }),
     new CopyWebpackPlugin({
@@ -232,7 +250,7 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
-      }
+      },
     ]
   }
 };
@@ -446,7 +464,7 @@ In order to inform `swagger-editor@5` npm package that I require it to use my Re
 
 ### yarn
 
-In order to inform `swagger-editor@5` npm package that I require it to use my specific React version, I need to use [yarm resolutions](https://yarnpkg.com/cli/set/resolution).
+In order to inform `swagger-editor@5` npm package that I require it to use my specific React version, I need to use [yarn resolutions](https://yarnpkg.com/cli/set/resolution).
 
 
 ```json
@@ -789,11 +807,11 @@ ReactDOM.render(<SwaggerEditor />, document.getElementById('swagger-editor'));
 
 ### Pre-built DockerHub image
 
-SwaggerEditor is available as a pre-built docker image hosted on [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-editor/tags?page=1&name=next-v5).
+SwaggerEditor is available as a pre-built docker image hosted on **docker.swagger.io**.
 
 ```sh
-$ docker pull swaggerapi/swagger-editor:next-v5
-$ docker run -d -p 8080:80 swaggerapi/swagger-editor:next-v5
+$ docker pull docker.swagger.io/swaggerapi/swagger-editor:next-v5
+$ docker run -d -p 8080:80 docker.swagger.io/swaggerapi/swagger-editor:next-v5
 ```
 
 ### Building locally
